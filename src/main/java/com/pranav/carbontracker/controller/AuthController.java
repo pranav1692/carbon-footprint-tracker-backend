@@ -3,7 +3,9 @@ package com.pranav.carbontracker.controller;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,42 +27,50 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public User register(@RequestBody User user){
+    public ResponseEntity<?> register(@Valid @RequestBody User user){
+
+        if(userRepository.findByEmail(user.getEmail()).isPresent()){
+            return ResponseEntity
+                    .badRequest()
+                    .body("Email already registered");
+        }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("User registered successfully");
     }
 
 //    @PostMapping("/login")
-//    public String login(@RequestBody User user){
+//    public Map<String, String> login(@RequestBody User user){
 //
 //        Optional<User> dbUser = userRepository.findByEmail(user.getEmail());
 //
-//        if(dbUser.isPresent()){
+//        if(dbUser.isPresent() &&
+//                passwordEncoder.matches(user.getPassword(), dbUser.get().getPassword())){
 //
-//            if(passwordEncoder.matches(user.getPassword(), dbUser.get().getPassword())){
-//                return "Login successful";
-//            }
+//            String token = jwtUtil.generateToken(user.getEmail());
+//
+//            return Map.of("token", token);
 //        }
 //
-//        return "Invalid credentials";
+//        // throw new RuntimeException("Invalid credentials");
+//        return Map.of("error", "Invalid credentials");
 //    }
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody User user){
+    public Map<String, String> login(@RequestBody User loginRequest){
 
-        Optional<User> dbUser = userRepository.findByEmail(user.getEmail());
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
-        if(dbUser.isPresent() &&
-                passwordEncoder.matches(user.getPassword(), dbUser.get().getPassword())){
-
-            String token = jwtUtil.generateToken(user.getEmail());
-
-            return Map.of("token", token);
+        if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
+            throw new RuntimeException("Invalid credentials");
         }
 
-        // throw new RuntimeException("Invalid credentials");
-        return Map.of("error", "Invalid credentials");
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        return Map.of("token", token);
     }
 }
