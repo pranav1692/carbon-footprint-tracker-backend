@@ -1,5 +1,7 @@
 package com.pranav.carbontracker.model;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -16,6 +18,16 @@ public class Activity {
     private double value;
 
     private double carbonEmission;
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    private LocalDate  date;
 
     public Long getId() { return id; }
 
