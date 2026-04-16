@@ -41,8 +41,10 @@ public class ActivityController {
         activity.setUserId(user.getId());
 
         double emission = carbonService.calculateEmission(
-                activity.getCategory(),
-                activity.getValue()
+                activity.getVehicleType(),
+                activity.getFuelType(),
+                activity.getDistance(),
+                activity.getPassengers()
         );
 
         activity.setCarbonEmission(emission);
@@ -69,7 +71,10 @@ public class ActivityController {
         Map<String, Double> summary = new HashMap<>();
 
         for(Object[] row : results){
-            summary.put((String) row[0], (Double) row[1]);
+            double value = (Double) row[1];
+            value = Math.round(value * 100.0) / 100.0;
+
+            summary.put((String) row[0], value);
         }
 
         return summary;
@@ -92,7 +97,10 @@ public class ActivityController {
         Map<Integer, Double> summary = new HashMap<>();
 
         for(Object[] row : results){
-            summary.put((Integer) row[0], (Double) row[1]);
+            double value = (Double) row[1];
+            value = Math.round(value * 100.0) / 100.0;
+
+            summary.put((Integer) row[0], value);
         }
 
         return summary;
@@ -112,9 +120,11 @@ public class ActivityController {
 
         List<Activity> activities = activityRepository.findByUserId(user.getId());
 
-        return activities.stream()
+        double total = activities.stream()
                 .mapToDouble(Activity::getCarbonEmission)
                 .sum();
+
+        return Math.round(total * 100.0) / 100.0;
     }
 
     @GetMapping("/my")
@@ -130,5 +140,28 @@ public class ActivityController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return activityRepository.findByUserId(user.getId());
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteActivity(@PathVariable Long id){
+
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Activity activity = activityRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Activity not found"));
+
+        if(!activity.getUserId().equals(user.getId())){
+            throw new RuntimeException("Unauthorized");
+        }
+
+        activityRepository.delete(activity);
+
+        return "Activity deleted successfully";
     }
 }

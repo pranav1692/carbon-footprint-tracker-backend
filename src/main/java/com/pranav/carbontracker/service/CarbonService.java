@@ -5,24 +5,55 @@ import org.springframework.stereotype.Service;
 @Service
 public class CarbonService {
 
-    public double calculateEmission(String category, double value){
+    public double calculateEmission(String vehicleType,
+                                    String fuelType,
+                                    double distance,
+                                    int passengers) {
 
-        switch(category.toLowerCase()){
+        double emission = 0;
 
-            case "car":
-                return value * 0.21;
+        switch (vehicleType.toLowerCase()) {
 
             case "bike":
-                return value * 0.11;
+                emission = (distance / 40) * 2.31;
+                break;
+
+            case "car":
+
+                if(fuelType == null) {
+                    fuelType = "petrol";
+                }
+
+                if(fuelType.equalsIgnoreCase("diesel")){
+                    emission = (distance / 15) * 2.68;
+                }else{
+                    emission = (distance / 15) * 2.31;
+                }
+
+                break;
 
             case "bus":
-                return value * 0.05;
+                emission = (distance / 5) * 2.68;
+                break;
 
-            case "electricity":
-                return value * 0.82;
+            case "train":
+                emission = distance * 0.04;
+                break;
+
+            case "flight":
+                emission = distance * 0.25;
+                break;
 
             default:
-                throw new IllegalArgumentException("Invalid activity category");
+                emission = distance * 0.2;
         }
+
+        if(passengers <= 0){
+            passengers = 1;
+        }
+
+        double result = emission / passengers;
+
+        return Math.round(result * 100.0) / 100.0;
     }
 }

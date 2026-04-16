@@ -3,6 +3,7 @@ package com.pranav.carbontracker.model;
 import java.time.LocalDate;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Activity {
@@ -13,11 +14,53 @@ public class Activity {
 
     private Long userId;
 
-    private String category;
-
-    private double value;
-
     private double carbonEmission;
+
+    private LocalDate  date;
+
+    @NotNull
+    private String vehicleType;
+
+    @NotNull
+    private String fuelType;
+
+    @NotNull
+    private double distance;
+
+    @NotNull
+    private int passengers;
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
+    public int getPassengers() {
+        return passengers;
+    }
+
+    public void setPassengers(int passengers) {
+        this.passengers = passengers;
+    }
 
     public LocalDate getDate() {
         return date;
@@ -27,8 +70,6 @@ public class Activity {
         this.date = date;
     }
 
-    private LocalDate  date;
-
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
@@ -36,14 +77,6 @@ public class Activity {
     public Long getUserId() { return userId; }
 
     public void setUserId(Long userId) { this.userId = userId; }
-
-    public String getCategory() { return category; }
-
-    public void setCategory(String category) { this.category = category; }
-
-    public double getValue() { return value; }
-
-    public void setValue(double value) { this.value = value; }
 
     public double getCarbonEmission() { return carbonEmission; }
 
