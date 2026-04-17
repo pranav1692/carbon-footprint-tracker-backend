@@ -49,7 +49,9 @@ public class ActivityController {
 
         activity.setCarbonEmission(emission);
 
-        activity.setDate(LocalDate.now());
+        if(activity.getDate() == null){
+            activity.setDate(LocalDate.now());
+        }
 
         return activityRepository.save(activity);
     }
@@ -184,6 +186,12 @@ public class ActivityController {
         activity.setFuelType(updatedActivity.getFuelType());
         activity.setDistance(updatedActivity.getDistance());
         activity.setPassengers(updatedActivity.getPassengers());
+
+        if(updatedActivity.getDate() == null){
+            activity.setDate(LocalDate.now());
+        }else{
+            activity.setDate(updatedActivity.getDate());
+        }
 
         double emission = carbonService.calculateEmission(
                 activity.getVehicleType(),
