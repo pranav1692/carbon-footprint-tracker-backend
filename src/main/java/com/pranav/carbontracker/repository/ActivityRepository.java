@@ -6,11 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     List<Activity> findByUserId(Long userId);
-
+    Optional<Activity> findByIdAndUserId(Long id, Long userId);
     // Category-wise sum of emissions
     @Query("SELECT a.vehicleType, SUM(a.carbonEmission) FROM Activity a WHERE a.userId = :userId GROUP BY a.vehicleType")
     List<Object[]> findCategorySummary(@Param("userId") Long userId);

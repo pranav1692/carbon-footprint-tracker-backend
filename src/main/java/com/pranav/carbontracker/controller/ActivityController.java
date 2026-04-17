@@ -164,4 +164,36 @@ public class ActivityController {
 
         return "Activity deleted successfully";
     }
+    @PutMapping("/{id}")
+    public Activity updateActivity(@PathVariable Long id,
+                                   @RequestBody Activity updatedActivity){
+
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Activity activity = activityRepository
+                .findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new RuntimeException("Activity not found"));
+
+        activity.setVehicleType(updatedActivity.getVehicleType());
+        activity.setFuelType(updatedActivity.getFuelType());
+        activity.setDistance(updatedActivity.getDistance());
+        activity.setPassengers(updatedActivity.getPassengers());
+
+        double emission = carbonService.calculateEmission(
+                activity.getVehicleType(),
+                activity.getFuelType(),
+                activity.getDistance(),
+                activity.getPassengers()
+        );
+
+        activity.setCarbonEmission(emission);
+
+        return activityRepository.save(activity);
+    }
 }
